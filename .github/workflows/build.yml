@@ -1,0 +1,52 @@
+name: Build and Test Multiple Projects
+
+on:
+  push:
+    branches: [ master ]
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        # Список проектов (указываем пути к .csproj файлам)
+        project:
+          - lab2/lab2.csproj
+        include:
+          # Указываем имя артефакта для каждого проекта
+          - project: lab2/lab2.csproj
+            artifact-name: lab2
+
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Укажите вашу версию .NET
+
+      # 3. Восстанавливаем зависимости для конкретного проекта
+      - name: Restore dependencies
+        run: dotnet restore ${{ matrix.project }}
+
+      # 4. Компилируем проект
+      - name: Build
+        run: dotnet build ${{ matrix.project }} --configuration Release --no-restore
+
+      # 6. Публикуем артефакты для проекта
+      - name: Publish artifacts
+        run: |
+          dotnet publish ${{ matrix.project }} -c Release -o ./publish/${{ matrix.artifact-name }}-${{ matrix.os }}
+        if: success()
+
+      # 7. Загружаем артефакты в GitHub
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}-${{ matrix.os }}-build
+          path: ./publish/${{ matrix.artifact-name }}-${{ matrix.os }}
