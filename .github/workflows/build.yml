@@ -13,10 +13,10 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
         # Список проектов (указываем пути к .csproj файлам)
         project:
-          - lab2/lab2.csproj
+          - TI-lab2/lab2.csproj
         include:
           # Указываем имя артефакта для каждого проекта
-          - project: lab2/lab2.csproj
+          - project: TI-lab2/lab2.csproj
             artifact-name: lab2
 
     steps:
